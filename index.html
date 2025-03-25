@@ -31,6 +31,7 @@
             border-radius: 50%;
             box-shadow: 0 0 10px cyan;
             transition: background-color 0.2s;
+            touch-action: none; /* Улучшает обработку тапов на мобильных */
         }
         #game-over {
             display: none;
@@ -161,7 +162,7 @@
 
         function handleMissClick(event) {
             if (!isGameRunning) return;
-            if (event.target !== ball) {
+             {
                 isGameRunning = false;
                 ball.classList.add("explode");
                 setTimeout(() => {
@@ -177,10 +178,25 @@
             resetGame();
         }
 
+        
         startButton.addEventListener("click", resetGame);
         chaosButton.addEventListener("click", toggleChaosMode);
-        ball.addEventListener("click", handleBallClick);
-        gameContainer.addEventListener("click", handleMissClick);
+        gameContainer.addEventListener("click", function(event) { // Изменили document на gameContainer
+         let rect = ball.getBoundingClientRect();
+    
+         let ballX = rect.left + rect.width / 2;
+         let ballY = rect.top + rect.height / 2;
+         let clickX = event.clientX;
+         let clickY = event.clientY;
+
+         let distance = Math.sqrt((clickX - ballX) ** 2 + (clickY - ballY) ** 2);
+    
+         if (distance <= rect.width * 0.7) {  // Увеличиваем кликабельную зону на 70%
+             handleBallClick();
+         } else {
+             handleMissClick();
+         }
+        });
     </script>
     <ins class="adsbygoogle"
     style="display:block"
