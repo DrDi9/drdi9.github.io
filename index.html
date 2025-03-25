@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5435975278668745"
+     crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра с шариком</title>
+    <style>
+        body {
+            text-align: center;
+            background-color: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            margin: 20px auto;
+            background-color: black;
+            border: 2px solid white;
+            overflow: hidden;
+        }
+        #ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, cyan, blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px cyan;
+            transition: background-color 0.2s;
+        }
+        #game-over {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 2px solid red;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #666;
+        }
+        .explode {
+            animation: explode 0.3s ease-out forwards;
+        }
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Игра с шариком</h1>
+       <!-- Рекламный блок -->
+       <div class="ad-container">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-ВАШ_КОД"
+             data-ad-slot="ВАШ_СЛОТ"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    <div id="game-container">
+        <div id="ball"></div>
+        <div id="game-over">GAME OVER</div>
+    </div>
+    <p>Счет: <span id="score">0</span> | Рекорд: <span id="record">0</span></p>
+    <p>Счет хаоса: <span id="chaos-score">0</span> | Рекорд хаоса: <span id="chaos-record">0</span></p>
+    <button id="start-button">Начать игру</button>
+    <button id="chaos-button">Режим хаоса: Выкл</button>
+
+    <script>
+        const ball = document.getElementById("ball");
+        const gameContainer = document.getElementById("game-container");
+        const scoreDisplay = document.getElementById("score");
+        const recordDisplay = document.getElementById("record");
+        const chaosScoreDisplay = document.getElementById("chaos-score");
+        const chaosRecordDisplay = document.getElementById("chaos-record");
+        const gameOverScreen = document.getElementById("game-over");
+        const startButton = document.getElementById("start-button");
+        const chaosButton = document.getElementById("chaos-button");
+
+        let ballX, ballY, speedX, speedY;
+        let baseSpeed = 1.5;
+        let score = 0;
+        let record = 0;
+        let chaosScore = 0;
+        let chaosRecord = 0;
+        let isGameRunning = false;
+        let isChaosMode = false;
+
+        function resetGame() {
+            if (isGameRunning) return;
+            score = 0;
+            chaosScore = 0;
+            baseSpeed = 1.5;
+            startGame();
+        }
+
+        function startGame() {
+            isGameRunning = true;
+            gameOverScreen.style.display = "none";
+            ballX = gameContainer.clientWidth / 2 - 20;
+            ballY = gameContainer.clientHeight / 2 - 20;
+            speedX = (Math.random() > 0.5 ? 1 : -1) * baseSpeed;
+            speedY = (Math.random() > 0.5 ? 1 : -1) * baseSpeed;
+            updateBallPosition();
+            requestAnimationFrame(updateGame);
+        }
+
+        function updateGame() {
+            if (!isGameRunning) return;
+            ballX += speedX;
+            ballY += speedY;
+
+            if (ballX <= 0 || ballX >= gameContainer.clientWidth - 40) speedX *= -1;
+            if (ballY <= 0 || ballY >= gameContainer.clientHeight - 40) speedY *= -1;
+
+            if (isChaosMode && Math.random() < 0.02) {
+                speedX += (Math.random() - 0.5) * 2;
+                speedY += (Math.random() - 0.5) * 2;
+            }
+
+            updateBallPosition();
+            requestAnimationFrame(updateGame);
+        }
+
+        function updateBallPosition() {
+            ball.style.left = ballX + "px";
+            ball.style.top = ballY + "px";
+        }
+
+        function handleBallClick() {
+            if (!isGameRunning) return;
+            score++;
+            if (isChaosMode) chaosScore++;
+
+            scoreDisplay.textContent = score;
+            chaosScoreDisplay.textContent = chaosScore;
+
+            if (score > record) {
+                record = score;
+                recordDisplay.textContent = record;
+            }
+
+            if (chaosScore > chaosRecord) {
+                chaosRecord = chaosScore;
+                chaosRecordDisplay.textContent = chaosRecord;
+            }
+
+            baseSpeed += 0.2;
+            speedX *= 1.1;
+            speedY *= 1.1;
+
+            ball.style.background = `radial-gradient(circle, rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}), black)`;
+        }
+
+        function handleMissClick(event) {
+            if (!isGameRunning) return;
+            if (event.target !== ball) {
+                isGameRunning = false;
+                ball.classList.add("explode");
+                setTimeout(() => {
+                    ball.classList.remove("explode");
+                    gameOverScreen.style.display = "block";
+                }, 300);
+            }
+        }
+
+        function toggleChaosMode() {
+            isChaosMode = !isChaosMode;
+            chaosButton.textContent = `Режим хаоса: ${isChaosMode ? "Вкл" : "Выкл"}`;
+            resetGame();
+        }
+
+        startButton.addEventListener("click", resetGame);
+        chaosButton.addEventListener("click", toggleChaosMode);
+        ball.addEventListener("click", handleBallClick);
+        gameContainer.addEventListener("click", handleMissClick);
+    </script>
+</body>
+</html>
